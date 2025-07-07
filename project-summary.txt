@@ -1,0 +1,27 @@
+Project Title: Shopify AI Chatbot (n8n + GPT + Webhook)
+
+Summary:
+This automation project simulates a Shopify customer support chatbot using n8n. The chatbot can handle multiple intents such as order status inquiries, FAQs, help requests, and support contact—based on the user's message.
+
+Tools Used:
+- n8n (self-hosted)
+- OpenRouter GPT API (Mistral model)
+- Postman (for testing)
+- JSON-based Webhook input
+
+Features:
+✔️ Smart intent detection (order, faq, help, support)
+✔️ Mock Shopify order data injected dynamically
+✔️ GPT-generated replies (custom per intent)
+✔️ Clean response returned via webhook
+✔️ All nodes renamed for client clarity
+
+Tested using Postman with 4 unique messages:
+1. “Where is my order?” → GPT reply using mock data
+2. “Do you offer free shipping?” → FAQ reply
+3. “I need help.” → Help intent reply
+4. “I want to talk to support.” → Contact info reply
+
+This workflow is modular and can be extended to real Shopify API, or connected to other chat platforms.
+
+Built by: tol-ai

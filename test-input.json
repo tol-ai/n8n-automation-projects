@@ -1,0 +1,6 @@
+{
+  "message": "Do you offer free shipping?",
+  "intent": "faq",
+  "webhookUrl": "http://localhost:5678/webhook/chatbot",
+  "executionMode": "production"
+}

@@ -1,0 +1,455 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "a6498063-605c-4210-90ef-7d151e4ec97f",
+      "name": "Receive Message from User (Webhook)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -700,
+        220
+      ],
+      "webhookId": "20860c11-01f7-4739-8904-698df3449f26"
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "message",
+              "stringValue": "={{ $json[\"body\"][\"message\"] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cc5ee284-cbdb-49af-a232-1d2b4e8a1ab0",
+      "name": "Store User Message",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        -460,
+        220
+      ]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{$json.body.intent}}",
+        "rules": {
+          "rules": [
+            {
+              "operation": "contains",
+              "value2": "order"
+            },
+            {
+              "operation": "contains",
+              "value2": "faq",
+              "output": 1
+            },
+            {
+              "operation": "contains",
+              "value2": "help",
+              "output": 2
+            },
+            {
+              "operation": "contains",
+              "value2": "support",
+              "output": 3
+            }
+          ]
+        }
+      },
+      "id": "dea3a09a-66e5-4380-be44-c9499893aba1",
+      "name": " Identify User Intent (order/faq/help/support)",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [
+        -220,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "return [{ json: { orderId: '12345', status: 'Processing', trackingNumber: 'TRK-987654321' } }];"
+      },
+      "id": "78456ee0-99ea-4c6e-ada3-dc8d107ca2a6",
+      "name": "Generate Mock Order Info",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        -40
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistralai/mistral-7b-instruct:free\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful Shopify assistant.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Hi! Here is the order info:\\nOrder ID: {{$json.orderId}}\\nStatus: {{$json.status}}\\nTracking: {{$json.trackingNumber}}\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        420,
+        -60
+      ],
+      "id": "7a5ed551-f02a-4331-8a9c-a1d150d8dffb",
+      "name": "Call GPT (via OpenRouter)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b4648f2a-4930-4f81-8c3b-7090df77b968",
+              "name": "reply",
+              "value": "={{$json[\"choices\"][0][\"message\"][\"content\"]}}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        620,
+        -40
+      ],
+      "id": "ce0fe941-ee9c-4fd3-aee1-a313bb2338aa",
+      "name": "Store GPT Reply"
+    },
+    {
+      "parameters": {
+        "options": {
+          "responseKey": "reply"
+        }
+      },
+      "id": "32214cd8-64ef-4791-ae4c-c474337a26b6",
+      "name": "Send Final Reply to User",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        800,
+        260
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "reply",
+              "stringValue": "Here are some common FAQs:\\n1. How do I track my order?\\n2. What is the return policy?\\n3. How do I contact support?"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a5d1e51-46db-4f2c-b426-0dca1b8960b0",
+      "name": "Prepare FAQ Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        420,
+        160
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "reply",
+              "stringValue": "Sure! I'm here to help. Please type your question or let me know what you need assistance with."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8e1f66b8-9eb2-4667-b8f5-9fa7179475a5",
+      "name": "Prepare Help Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        420,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "reply",
+              "stringValue": "Need support? Please contact us at support@example.com."
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "80d9461c-9e8b-489f-94a8-998269f437db",
+      "name": "Prepare Support Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [
+        420,
+        560
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36170142-f6dc-4a7c-b722-ab5a48237e93",
+              "name": "reply",
+              "value": "Here are some common FAQs:\\n1. How do I track my order?\\n2. What is your return policy?\\n3. How can I contact support?\\n\\nIf you have other questions, just ask!",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        160
+      ],
+      "id": "d1cbe23d-1526-4618-b926-df439725bbe5",
+      "name": "Store GPT Reply (FAQ)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "98cc6004-82e5-4975-a214-122bf7ac3b5f",
+              "name": "reply",
+              "value": "Sure! I can assist you with anything related to your order, tracking, returns, or our services. Just type your question and I’ll help you!",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        360
+      ],
+      "id": "fea59008-cf32-4424-889f-4595f4c3c6df",
+      "name": "Store GPT Reply (Help)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1c55b0f0-a125-4822-9dda-5dec7a06883f",
+              "name": "reply",
+              "value": "Sure! You can reach our customer support at support@example.com or through our live chat. We’re available from 9AM to 5PM, Monday to Friday.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        560
+      ],
+      "id": "e4ede833-5e84-4283-bca7-3f06418832df",
+      "name": "Store GPT Reply (Support)"
+    }
+  ],
+  "connections": {
+    "Receive Message from User (Webhook)": {
+      "main": [
+        [
+          {
+            "node": "Store User Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store User Message": {
+      "main": [
+        [
+          {
+            "node": " Identify User Intent (order/faq/help/support)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    " Identify User Intent (order/faq/help/support)": {
+      "main": [
+        [
+          {
+            "node": "Generate Mock Order Info",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store GPT Reply (FAQ)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store GPT Reply (Help)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Store GPT Reply (Support)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Mock Order Info": {
+      "main": [
+        [
+          {
+            "node": "Call GPT (via OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call GPT (via OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Store GPT Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store GPT Reply": {
+      "main": [
+        [
+          {
+            "node": "Send Final Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare FAQ Prompt": {
+      "main": [
+        [
+          {
+            "node": "Send Final Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Help Prompt": {
+      "main": [
+        [
+          {
+            "node": "Send Final Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Support Prompt": {
+      "main": [
+        [
+          {
+            "node": "Send Final Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store GPT Reply (FAQ)": {
+      "main": [
+        [
+          {
+            "node": "Prepare FAQ Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store GPT Reply (Help)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Help Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store GPT Reply (Support)": {
+      "main": [
+        [
+          {
+            "node": "Prepare Support Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30325128be6eb9600bd253a77b1d550147620117bafd6bab613c3bf721e21246"
+  }
+}
