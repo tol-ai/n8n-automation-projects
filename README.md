@@ -1,31 +1,49 @@
-# CRM Onboarding Automation
+# 🤖 CRM Onboarding Automation (n8n)
 
 This workflow automates CRM client intake from a webhook form.
 
+---
+
 ## 🧠 Use Case
 
-Useful for sales/marketing teams who collect client leads from forms and want to auto-save the data into Airtable, notify the team via email, and log the record in Google Sheets.
+Perfect for sales/marketing teams who collect client leads via forms and want to:
 
-## 🛠️ Tech Used
-- n8n
-- Webhook Trigger
-- Airtable API
-- Google Sheets API
-- Gmail (email alert)
+- Save new client data to Airtable automatically
+- Notify the team via Gmail
+- Log every entry to Google Sheets
+- Send success/error response back to the form user
+
+---
+
+## 🛠️ Tech Stack
+
+- 🔗 **n8n**
+- 🌐 **Webhook Trigger**
+- 🧾 **Airtable API**
+- 📊 **Google Sheets API**
+- 📧 **Gmail (email alert)**
+
+---
 
 ## 📂 Workflow Structure
 
-1. Receive Form
-2. Validate Data
-3. Save to Airtable
-4. Send Success/Fail Email
-5. Log to Google Sheets
-6. Respond back to user
+1. **Receive Webhook** – from a new client form  
+2. **Validate Required Fields** – ensure no missing data  
+3. **Save to Airtable** – store client info in CRM table  
+4. **Send Email Alert** – success or error message  
+5. **Log to Google Sheets** – record entry for backup/tracking  
+6. **Respond to Sender** – with success or error response
 
-## ✅ Sample Output
-(Insert screenshots here)
+---
 
-## 🧪 Test Input
+## ✅ Sample Output Screenshot
+
+📸 Workflow screenshot by Success and workflow screenshot by error
+
+---
+
+## 🧪 Sample Test Input
+
 ```json
 {
   "firstName": "Juan",
