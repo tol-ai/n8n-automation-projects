@@ -1,0 +1,428 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "append",
+        "sheetId": "19jFS-VuLwYVHuU7wu6gtcdKCHSat3n-aFkUwBF02EiA",
+        "range": "Sheet1!A:D",
+        "options": {}
+      },
+      "id": "bbe170c9-1d8f-4ae5-9d2b-858dd71a9e27",
+      "name": "Log to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        780,
+        -120
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "dZGgYcxrmtQHjgiC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "crm-onboarding",
+        "options": {}
+      },
+      "id": "ed9bce69-f2c0-4322-b7dc-ba7c61435596",
+      "name": "Receive New Client Form",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -260,
+        0
+      ],
+      "typeVersion": 1,
+      "webhookId": "c66aea7b-7cfa-478f-af16-4bb0e4c1c657"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0d074425-24ea-4d4d-9fa9-dea42220676b",
+              "leftValue": "={{$json[\"firstName\"]}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "329b48da-9c16-496c-af23-6442f1619903",
+              "leftValue": "={{$json[\"lastName\"]}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "bd075bdc-f8a7-4096-952a-de93a402a581",
+              "leftValue": "={{$json[\"email\"]}}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -60,
+        0
+      ],
+      "id": "3ddc33d8-f7c9-4b05-a52e-359ca068c0f9",
+      "name": "Check Required Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4dfc0144-6251-4f8e-98ca-b177e3980024",
+              "name": "message",
+              "value": "=✅ Client onboarded successfully: {{$json[\"firstName\"]}} {{$json[\"lastName\"]}} ({{$json[\"email\"]}})\n",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        -120
+      ],
+      "id": "955465b4-c324-4efe-969f-c126850277cd",
+      "name": "Prepare Success Message"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a2f3384-e5e0-467d-be96-ba734e8a6610",
+              "name": "message",
+              "value": "❌ Onboarding failed. Missing required data. ({{$json[\"email\"]",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        140,
+        120
+      ],
+      "id": "c5cb29ce-7e71-46cd-a034-fb9134ad9dfc",
+      "name": "Prepare Error Message"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appSkIfAZpPUbZgBu",
+          "mode": "list",
+          "cachedResultName": "beginner course",
+          "cachedResultUrl": "https://airtable.com/appSkIfAZpPUbZgBu"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblCUzSvVSQC7VDqR",
+          "mode": "list",
+          "cachedResultName": "Clients",
+          "cachedResultUrl": "https://airtable.com/appSkIfAZpPUbZgBu/tblCUzSvVSQC7VDqR"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "First Name": "={{$json[\"firstName\"]}}",
+            "Last Name": "={{$json[\"lastName\"]}}",
+            "Email": "={{$json[\"email\"]}}",
+            "Phone": "={{$json[\"phone\"]}}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "First Name",
+              "displayName": "First Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Last Name",
+              "displayName": "Last Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Phone",
+              "displayName": "Phone",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        -120
+      ],
+      "id": "510f56dd-4298-4b44-b95b-603ee9dc76a2",
+      "name": "Save to Airtable CRM",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "N1ghFKjK19iqNE1q",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "New CRM Client: {{$json[\"firstName\"]}} {{$json[\"lastName\"]}}",
+        "includeHtml": true,
+        "htmlMessage": "=<p>🆕 A new client was added to the CRM system:</p> <ul>   <li>👤 Name: {{$json[\"firstName\"]}} {{$json[\"lastName\"]}}</li>   <li>📧 Email: {{$json[\"email\"]}}</li>   <li>📱 Phone: {{$json[\"phone\"]}}</li> </ul>",
+        "message": "A new client was added to the CRM system.  👤 Name: {{$json[\"firstName\"]}} {{$json[\"lastName\"]}} 📧 Email: {{$json[\"email\"]}} 📱 Phone: {{$json[\"phone\"]}}",
+        "toList": [
+          "tol.ai.ph@gmail.com"
+        ],
+        "additionalFields": {}
+      },
+      "id": "23a65cfc-6258-40f6-a430-766a43fd090c",
+      "name": "Email Success Notice",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        560,
+        -120
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "r2Q7e5g9Sqin1nGX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "tol.ai.ph@gmail.com",
+        "subject": "❌ CRM Onboarding Failed",
+        "message": "=<p>❌ A client failed onboarding. Missing fields detected.</p>\n<ul>\n  <li>👤 Name: {{$json[\"firstName\"] || \"N/A\"}} {{$json[\"lastName\"] || \"N/A\"}}</li>\n  <li>📧 Email: {{$json[\"email\"] || \"Not Provided\"}}</li>\n  <li>📱 Phone: {{$json[\"phone\"] || \"Not Provided\"}}</li>\n</ul>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        360,
+        120
+      ],
+      "id": "e66635bb-dc42-4e8a-8f9e-d4af1f186ce7",
+      "name": "Email Error Alert",
+      "webhookId": "5d076d3a-5b67-4ee7-86c6-08a5b354abf5",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "r2Q7e5g9Sqin1nGX",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"status\": \"success\",\n  \"message\": \"{{$json['message']}}\",\n  \"email\": \"{{$json['email']}}\",\n  \"name\": \"{{$json['firstName']}} {{$json['lastName']}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1000,
+        -120
+      ],
+      "id": "627dc332-2bc5-498e-a92e-6db76d9736ae",
+      "name": "Return Success to Sender"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"status\": \"error\",\n  \"message\": \"{{$json['message']}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        580,
+        120
+      ],
+      "id": "6c247d14-b1a7-4fc4-8a52-fe3fb652b676",
+      "name": "Return Error to Sender"
+    }
+  ],
+  "connections": {
+    "Log to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Return Success to Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Receive New Client Form": {
+      "main": [
+        [
+          {
+            "node": "Check Required Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Required Fields": {
+      "main": [
+        [
+          {
+            "node": "Prepare Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Error Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Success Message": {
+      "main": [
+        [
+          {
+            "node": "Save to Airtable CRM",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Error Message": {
+      "main": [
+        [
+          {
+            "node": "Email Error Alert",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Airtable CRM": {
+      "main": [
+        [
+          {
+            "node": "Email Success Notice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Success Notice": {
+      "main": [
+        [
+          {
+            "node": "Log to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Error Alert": {
+      "main": [
+        [
+          {
+            "node": "Return Error to Sender",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {
+    "Receive New Client Form": [
+      {
+        "firstName": "",
+        "lastName": "Dela Cruz",
+        "email": ""
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "30325128be6eb9600bd253a77b1d550147620117bafd6bab613c3bf721e21246"
+  }
+}
