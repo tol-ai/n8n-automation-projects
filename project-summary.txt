@@ -1,0 +1,9 @@
+This automation handles CRM onboarding using a webhook form.
+
+Key features:
+- Receives client info via webhook
+- Validates required fields (firstName, lastName, email)
+- Saves to Airtable CRM
+- Sends email alert on success or error
+- Logs entry to Google Sheets
+- Responds back to sender with status
