@@ -1,0 +1,162 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "path": "generate-cold-email",
+        "options": {}
+      },
+      "id": "0fc59642-0bdc-4e9b-bcf8-310f19d0f3e6",
+      "name": "Trigger: Start Workflow",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        20
+      ],
+      "webhookId": "e8e8750c-981f-45b1-9d9d-0fbe26cbaba5"
+    },
+    {
+      "parameters": {
+        "functionCode": "return [\n  {\n    json: {\n      name: \"John Doe\",\n      email: \"john@example.com\",\n      company: \"Acme Inc.\",\n      role: \"Marketing Manager\"\n    }\n  },\n  {\n    json: {\n      name: \"Jane Smith\",\n      email: \"jane@example.com\",\n      company: \"Globex Corp.\",\n      role: \"Product Lead\"\n    }\n  }\n];"
+      },
+      "id": "d1201d87-1e3d-4f1f-99aa-a830f03c43ee",
+      "name": "Generate Sample Leads",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        160,
+        20
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://openrouter.ai/api/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer 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"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"mistralai/mistral-7b-instruct\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful AI that writes short, professional cold emails for AI automation services.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a cold email to {{ $json.name }}, a {{ $json.role }} at {{ $json.company }}. Keep it short and friendly. Mention that you help businesses save time using AI automation.\"\n    }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        400,
+        20
+      ],
+      "id": "3b32b6f0-3f8d-42a7-8b89-282433524415",
+      "name": "Generate Email (GPT via OpenRouter)"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const content = item.json.choices?.[0]?.message?.content || '';\n  \n  // Extract only the subject part\n  const subjectLine = content.split('\\n').pop().trim();\n\n  return {\n    json: {\n      subject: subjectLine,\n      ...item.json // merge with other existing fields if needed\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        20
+      ],
+      "id": "fd807168-d3ff-4abd-8711-5aa8992b0119",
+      "name": "Extract Subject from GPT Reply"
+    },
+    {
+      "parameters": {
+        "fromEmail": "tol.ai.ph@gmail.com",
+        "toEmail": "=={{ $node[\"Generate Sample Leads\"].json[\"email\"] }}\n\n",
+        "subject": "={{ $json.subject }}\n\n\n",
+        "text": "={{ $json.choices[0].message.content }}\n",
+        "options": {}
+      },
+      "id": "cec37c67-02a6-453c-9b20-294c21f71383",
+      "name": "Send Email via SMTP",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        860,
+        20
+      ],
+      "credentials": {
+        "smtp": {
+          "id": "iiafkqaIem592oza",
+          "name": "SMTP account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Trigger: Start Workflow": {
+      "main": [
+        [
+          {
+            "node": "Generate Sample Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Sample Leads": {
+      "main": [
+        [
+          {
+            "node": "Generate Email (GPT via OpenRouter)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Email (GPT via OpenRouter)": {
+      "main": [
+        [
+          {
+            "node": "Extract Subject from GPT Reply",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Subject from GPT Reply": {
+      "main": [
+        [
+          {
+            "node": "Send Email via SMTP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email via SMTP": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "pinData": {
+    "Trigger: Start Workflow": [
+      {
+        "name": "John Doe",
+        "email": "johndoe@example.com"
+      }
+    ]
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e1aa8d5a307ebd8a6335fa9b00965f16037802d2a50633a946f801d725031847"
+  }
+}

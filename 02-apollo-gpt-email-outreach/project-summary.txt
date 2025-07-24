@@ -1,0 +1,1 @@
+Lead generation automation that takes Apollo leads, filters them, generates personalized cold emails using GPT, and sends them via SMTP. Ideal for B2B cold outreach campaigns and scalable email marketing workflows.
